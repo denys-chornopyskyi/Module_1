@@ -1,9 +1,9 @@
-def read_file():
-  with open('contacts.txt', 'r') as file:
-    return file.readlines()
-  
-def parse_contacts(lines : list[str]) -> list[dict]:
+def parse_contacts() -> list[dict]:
   contacts = []
+  
+  with open('contacts.txt', 'r') as file:
+    lines = file.readlines()
+    
   for line in lines:
     formated_list = line.strip('\n').split(', ');
     contact = {
@@ -14,7 +14,4 @@ def parse_contacts(lines : list[str]) -> list[dict]:
     contacts.append(contact)
   return contacts
 
-content = read_file()
-contacts = parse_contacts(content)
-
-print(contacts[0]['name'])
+contacts = parse_contacts()
