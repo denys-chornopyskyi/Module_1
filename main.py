@@ -15,7 +15,7 @@ def parse_contacts() -> list[dict]:
   return contacts
 
 
-def contacts_to_text(contacts: list[dict]) -> None:
+def write_file(contacts: list[dict]) -> None:
   contacts = contacts.copy()
   new_contacts = []
 
@@ -24,7 +24,6 @@ def contacts_to_text(contacts: list[dict]) -> None:
     new_contacts.append(line)
 
   with open('contacts.txt', 'w') as file:
-    print(new_contacts) 
     file.writelines(new_contacts)
 
 
@@ -50,6 +49,7 @@ def input_and_validate_contact_data() -> dict:
 
   return dict(name=name, phone=phone, email=email)
 
+
 def detect_name_or_phone(input: str) -> str | None:
   if input != '' and input.isdigit():
     return 'phone'
@@ -57,3 +57,10 @@ def detect_name_or_phone(input: str) -> str | None:
     return 'name'
   else:
     print('Введите имя или номер телефона:')
+
+
+def add_contact(contacts: list[dict]) -> None:
+  contact = input_and_validate_contact_data()
+  contacts.append(contact)
+  write_file(contacts)
+
