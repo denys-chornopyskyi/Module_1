@@ -50,4 +50,10 @@ def input_and_validate_contact_data() -> dict:
 
   return dict(name=name, phone=phone, email=email)
 
-input_and_validate_contact_data()
+def detect_name_or_phone(input: str) -> str | None:
+  if input != '' and input.isdigit():
+    return 'phone'
+  elif input != '':
+    return 'name'
+  else:
+    print('Введите имя или номер телефона:')
