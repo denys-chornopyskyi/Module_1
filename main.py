@@ -64,3 +64,19 @@ def add_contact(contacts: list[dict]) -> None:
   contacts.append(contact)
   write_file(contacts)
 
+
+def display_sorted_contacts_by_name(contacts):
+  sorted_contacts = sorted(contacts, key=lambda contact: contact.get('name'))
+  
+  numeration = 1
+  for contact in sorted_contacts:
+    print(f"{numeration}. {contact['name']},   {contact['phone']},   {contact['email']}")
+    numeration += 1
+
+contacts = [
+    {'name': 'Denys', 'phone': '+42087584', 'email': 'chornopyskyidenys@gmail.com'},
+    {'name': 'Artem', 'phone': '+420989485093', 'email': 'chornopyskyiartem@gmail.com'},
+    {'name': 'Olga', 'phone': '+420123456789', 'email': 'olga@example.com'}
+]
+
+display_sorted_contacts_by_name(contacts)
