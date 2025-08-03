@@ -132,8 +132,28 @@ def remove_contact(contacts: list[dict]) -> None:
   else:
     print('❌ Контакт не найден.')
 
-contacts = parse_contacts()
-add_contact(contacts)
-display_sorted_contacts_by_name(contacts)
-remove_contact(contacts)
-display_sorted_contacts_by_name(contacts)
+
+def update_contact(contacts: list[dict]) -> None:
+  while True:
+    contact_to_find = input('Введите имя или номер телефона: ')
+    formated_contact_query = contact_to_find.lstrip('+').lower()
+
+    if formated_contact_query.isdigit() and len(formated_contact_query) == 12:
+      contact_type = 'phone'
+      break
+    elif contact_to_find.isalpha():
+      contact_type = 'name'
+      break
+
+  if any(contact[contact_type].lower().lstrip('+') == formated_contact_query for contact in contacts):
+    for contact in contacts:
+      if contact[contact_type].lower().lstrip('+') == formated_contact_query:
+        print(f"{contact['name']},   {contact['phone']},   {contact['email']}")
+        updated_contact = input_and_validate_contact_data()
+        contacts[contacts.index(contact)].update(updated_contact)
+        print('✅ Контакт обновлён!')
+        break
+
+  else:
+    print('❌ Контакт не найден.')
+
