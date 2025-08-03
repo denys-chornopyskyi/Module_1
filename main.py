@@ -50,28 +50,37 @@ def input_and_validate_contact_data() -> dict:
   return dict(name=name, phone=phone, email=email)
 
 
-def detect_name_or_phone(input: str) -> str | None:
-  if input != '' and input.isdigit():
-    return 'phone'
-  elif input != '':
-    return 'name'
-  else:
-    print('Введите имя или номер телефона:')
-
-
 def add_contact(contacts: list[dict]) -> None:
   contact = input_and_validate_contact_data()
   contacts.append(contact)
   write_file(contacts)
 
 
-def display_sorted_contacts_by_name(contacts):
+def display_sorted_contacts_by_name(contacts: list[dict]) -> None:
   sorted_contacts = sorted(contacts, key=lambda contact: contact.get('name'))
-  
   numeration = 1
+
   for contact in sorted_contacts:
     print(f"{numeration}. {contact['name']},   {contact['phone']},   {contact['email']}")
     numeration += 1
+
+
+def find_contact(contacts: list[dict]) -> None:
+  while True:
+    contact_to_find = input('Введите имя или номер телефона: ')
+    if contact_to_find.isdigit() and len(contact_to_find) >= 12:
+      contact_type = 'phone'
+      break
+    elif contact_to_find.isalpha():
+      contact_type = 'name'
+      break
+
+  if any(contact[contact_type].lower() == contact_to_find.lower() for contact in contacts):
+    for contact in contacts:
+      if contact[contact_type].lower() == contact_to_find.lower():
+        print(f"{contact['name']},   {contact['phone']},   {contact['email']}")
+  else:
+    print('❌ Контакт не найден.')
 
 contacts = [
     {'name': 'Denys', 'phone': '+42087584', 'email': 'chornopyskyidenys@gmail.com'},
@@ -79,4 +88,4 @@ contacts = [
     {'name': 'Olga', 'phone': '+420123456789', 'email': 'olga@example.com'}
 ]
 
-display_sorted_contacts_by_name(contacts)
+find_contact(contacts)
