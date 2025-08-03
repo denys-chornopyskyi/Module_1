@@ -35,7 +35,7 @@ def input_and_validate_contact_data() -> dict:
 
   while True:
     phone = input('ведите номер телефона: ')
-    if phone.isdigit() and len(phone.lstrip('+')) == 12 and name != '':
+    if phone.lstrip('+').isdigit() and len(phone.lstrip('+')) == 12 and name != '':
       break
     else: 
       print('Номер должен состоять из 12 символов и содержать только цифры.')
@@ -84,6 +84,56 @@ def find_contact(contacts: list[dict]) -> None:
   else:
     print('❌ Контакт не найден.')
 
-contacts = parse_contacts()
 
-find_contact(contacts)
+def remove_contact(contacts: list[dict]) -> None:
+  while True:
+    contact_to_find = input('Введите имя или номер телефона: ')
+    formated_contact_query = contact_to_find.lstrip('+').lower()
+
+    if formated_contact_query.isdigit() and len(formated_contact_query) == 12:
+      contact_type = 'phone'
+      break
+    elif contact_to_find.isalpha():
+      contact_type = 'name'
+      break
+
+  if any(contact[contact_type].lower().lstrip('+') == formated_contact_query for contact in contacts):
+    numeration = 1
+    index = 0
+    matching_contacts_index = []
+
+    for contact in contacts:
+      if contact[contact_type].lower().lstrip('+') == formated_contact_query:
+        matching_contacts_index.append(index)
+        print(f"{numeration}. {contact['name']},   {contact['phone']},   {contact['email']}")
+        numeration += 1
+      
+      index += 1
+    while True:
+      try: 
+        user_choise = int(input('vyberi kakoj kontakt choces udalit( 0 esli vse): '))
+      except ValueError:
+        print('vvedi cislo lil bro')
+      else:
+        if user_choise < numeration and user_choise >= 0:
+          break
+        else:
+          print('vvedit sootvesvujucij nomer')
+
+    if user_choise == 0:
+      print(matching_contacts_index)
+      print(contacts)
+      for index in sorted(matching_contacts_index, reverse=True):
+        print(index)
+        del contacts[index]
+      write_file(contacts)
+    else:
+      del contacts[matching_contacts_index[user_choise - 1]]
+  else:
+    print('❌ Контакт не найден.')
+
+contacts = parse_contacts()
+add_contact(contacts)
+display_sorted_contacts_by_name(contacts)
+remove_contact(contacts)
+display_sorted_contacts_by_name(contacts)
