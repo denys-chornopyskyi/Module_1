@@ -30,19 +30,19 @@ def write_file(contacts: list[dict]) -> None:
 def input_and_validate_contact_data() -> dict:
   while True:
     name = input('Введите имя: ')
-    if name != '':
+    if name.isalpha():
       break
 
   while True:
     phone = input('ведите номер телефона: ')
-    if phone.isdigit() and len(phone) == 12 and name != '':
+    if phone.isdigit() and len(phone.lstrip('+')) == 12 and name != '':
       break
     else: 
       print('Номер должен состоять из 12 символов и содержать только цифры.')
 
   while True:
     email = input('Введите адрес электронной почты: ')
-    if '@' in email and email != '':
+    if '@' in email and email:
       break
     else:
       print('Электронная почта должна содержать символ "@".')
@@ -68,24 +68,22 @@ def display_sorted_contacts_by_name(contacts: list[dict]) -> None:
 def find_contact(contacts: list[dict]) -> None:
   while True:
     contact_to_find = input('Введите имя или номер телефона: ')
-    if contact_to_find.isdigit() and len(contact_to_find) >= 12:
+    formated_contact_query = contact_to_find.lstrip('+').lower()
+
+    if formated_contact_query.isdigit() and len(formated_contact_query) == 12:
       contact_type = 'phone'
       break
     elif contact_to_find.isalpha():
       contact_type = 'name'
       break
 
-  if any(contact[contact_type].lower() == contact_to_find.lower() for contact in contacts):
+  if any(contact[contact_type].lower().lstrip('+') == formated_contact_query for contact in contacts):
     for contact in contacts:
-      if contact[contact_type].lower() == contact_to_find.lower():
+      if contact[contact_type].lower().lstrip('+') == formated_contact_query:
         print(f"{contact['name']},   {contact['phone']},   {contact['email']}")
   else:
     print('❌ Контакт не найден.')
 
-contacts = [
-    {'name': 'Denys', 'phone': '+42087584', 'email': 'chornopyskyidenys@gmail.com'},
-    {'name': 'Artem', 'phone': '+420989485093', 'email': 'chornopyskyiartem@gmail.com'},
-    {'name': 'Olga', 'phone': '+420123456789', 'email': 'olga@example.com'}
-]
+contacts = parse_contacts()
 
 find_contact(contacts)
