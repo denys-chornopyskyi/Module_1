@@ -100,35 +100,38 @@ def remove_contact(contacts: list[dict]) -> None:
   if any(contact[contact_type].lower().lstrip('+') == formated_contact_query for contact in contacts):
     numeration = 1
     index = 0
-    matching_contacts_index = []
+    matching_contact_indices = []
 
     for contact in contacts:
       if contact[contact_type].lower().lstrip('+') == formated_contact_query:
-        matching_contacts_index.append(index)
+        matching_contact_indices.append(index)
         print(f"{numeration}. {contact['name']},   {contact['phone']},   {contact['email']}")
         numeration += 1
       
       index += 1
+
     while True:
       try: 
-        user_choise = int(input('vyberi kakoj kontakt choces udalit( 0 esli vse): '))
+        chosen_number = int(input('Выберите контакт для удаления (введите номер, 0 — если все): '))
       except ValueError:
-        print('vvedi cislo lil bro')
+        print('Введите число')
       else:
-        if user_choise < numeration and user_choise >= 0:
+        if chosen_number < numeration and chosen_number >= 0:
           break
         else:
-          print('vvedit sootvesvujucij nomer')
+          print('Введите соответствующий номер')
 
-    if user_choise == 0:
-      print(matching_contacts_index)
+    if chosen_number == 0:
+      print(matching_contact_indices)
       print(contacts)
-      for index in sorted(matching_contacts_index, reverse=True):
+      for index in sorted(matching_contact_indices, reverse=True):
         print(index)
         del contacts[index]
       write_file(contacts)
+      print('✅ Контакты удалены!')
     else:
-      del contacts[matching_contacts_index[user_choise - 1]]
+      del contacts[matching_contact_indices[chosen_number - 1]]
+      print('✅ Контакт удалён!')
   else:
     print('❌ Контакт не найден.')
 
@@ -157,3 +160,31 @@ def update_contact(contacts: list[dict]) -> None:
   else:
     print('❌ Контакт не найден.')
 
+def main():
+  contacts = parse_contacts()
+  menu = (
+        '\n1. Добавить контакт\n'
+        '2. Найти контакт\n'
+        '3. Удалить контакт\n'
+        '4. Обновить контакт\n'
+        '5. Просмотреть контакты\n'
+        '6. Выйти\n'
+        )
+
+  while True:
+      print(menu) 
+      user_query = int(input('Введите номер действия: '))
+      match(user_query):
+        case 1:
+          add_contact(contacts)
+        case 2:
+          find_contact(contacts)
+        case 3: 
+          remove_contact(contacts)
+        case 4:
+          update_contact(contacts)
+        case 5:
+          display_sorted_contacts_by_name(contacts)
+        case 6:
+          break
+main()
