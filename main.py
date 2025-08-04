@@ -50,14 +50,29 @@ def input_and_validate_contact_data() -> dict:
   return dict(name=name, phone=phone, email=email)
 
 
+def detect_name_or_number() -> tuple:
+  while True:
+    contact_to_find = input('Введите имя или номер телефона: ')
+    formated_contact_query = contact_to_find.lstrip('+').lower()
+
+    if formated_contact_query.isdigit() and len(formated_contact_query) == 12:
+      contact_type = 'phone'
+      break
+    elif contact_to_find.isalpha():
+      contact_type = 'name'
+      break
+  return (formated_contact_query, contact_type)
+
+
 def add_contact(contacts: list[dict]) -> None:
   contact = input_and_validate_contact_data()
   contacts.append(contact)
   write_file(contacts)
+  print('✅ Контакт успешно добавлен!')
 
 
-def display_sorted_contacts_by_name(contacts: list[dict]) -> None:
-  sorted_contacts = sorted(contacts, key=lambda contact: contact.get('name'))
+def print_sorted_contacts_by_name(contacts: list[dict]) -> None:
+  sorted_contacts = sorted(contacts, key=lambda contact: contact.get('name').lower())
   numeration = 1
 
   for contact in sorted_contacts:
@@ -66,18 +81,10 @@ def display_sorted_contacts_by_name(contacts: list[dict]) -> None:
 
 
 def find_contact(contacts: list[dict]) -> None:
-  while True:
-    contact_to_find = input('Введите имя или номер телефона: ')
-    formated_contact_query = contact_to_find.lstrip('+').lower()
-
-    if formated_contact_query.isdigit() and len(formated_contact_query) == 12:
-      contact_type = 'phone'
-      break
-    elif contact_to_find.isalpha():
-      contact_type = 'name'
-      break
+  formated_contact_query, contact_type = detect_name_or_number()
 
   if any(contact[contact_type].lower().lstrip('+') == formated_contact_query for contact in contacts):
+    print('\n')
     for contact in contacts:
       if contact[contact_type].lower().lstrip('+') == formated_contact_query:
         print(f"{contact['name']},   {contact['phone']},   {contact['email']}")
@@ -86,16 +93,7 @@ def find_contact(contacts: list[dict]) -> None:
 
 
 def remove_contact(contacts: list[dict]) -> None:
-  while True:
-    contact_to_find = input('Введите имя или номер телефона: ')
-    formated_contact_query = contact_to_find.lstrip('+').lower()
-
-    if formated_contact_query.isdigit() and len(formated_contact_query) == 12:
-      contact_type = 'phone'
-      break
-    elif contact_to_find.isalpha():
-      contact_type = 'name'
-      break
+  formated_contact_query, contact_type = detect_name_or_number()
 
   if any(contact[contact_type].lower().lstrip('+') == formated_contact_query for contact in contacts):
     numeration = 1
@@ -122,33 +120,23 @@ def remove_contact(contacts: list[dict]) -> None:
           print('Введите соответствующий номер')
 
     if chosen_number == 0:
-      print(matching_contact_indices)
-      print(contacts)
       for index in sorted(matching_contact_indices, reverse=True):
-        print(index)
         del contacts[index]
       write_file(contacts)
       print('✅ Контакты удалены!')
+
     else:
       del contacts[matching_contact_indices[chosen_number - 1]]
       print('✅ Контакт удалён!')
+
   else:
     print('❌ Контакт не найден.')
 
 
 def update_contact(contacts: list[dict]) -> None:
-  while True:
-    contact_to_find = input('Введите имя или номер телефона: ')
-    formated_contact_query = contact_to_find.lstrip('+').lower()
+  formated_contact_query, contact_type = detect_name_or_number()
 
-    if formated_contact_query.isdigit() and len(formated_contact_query) == 12:
-      contact_type = 'phone'
-      break
-    elif contact_to_find.isalpha():
-      contact_type = 'name'
-      break
-
-  if any(contact[contact_type].lower().lstrip('+') == formated_contact_query for contact in contacts):
+  if any(contact[contact_type].lower().lstrip('+') == formated_contact_query for contact in contacts): 
     for contact in contacts:
       if contact[contact_type].lower().lstrip('+') == formated_contact_query:
         print(f"{contact['name']},   {contact['phone']},   {contact['email']}")
@@ -159,6 +147,7 @@ def update_contact(contacts: list[dict]) -> None:
 
   else:
     print('❌ Контакт не найден.')
+
 
 def main():
   contacts = parse_contacts()
@@ -184,7 +173,10 @@ def main():
         case 4:
           update_contact(contacts)
         case 5:
-          display_sorted_contacts_by_name(contacts)
+          print_sorted_contacts_by_name(contacts)
         case 6:
           break
+
+
 main()
+
