@@ -50,6 +50,19 @@ def input_and_validate_contact_data() -> dict:
   return dict(name=name, phone=phone, email=email)
 
 
+def validate_number_input(start: int, stop: int, input_text: str) -> int:
+  while True:
+      try: 
+        chosen_number = int(input(f'{input_text}: '))
+      except ValueError:
+        print('Error!! Введите число')
+      else:
+        if chosen_number < stop and chosen_number >= start:
+          return chosen_number
+        else:
+          print(f'Введите соответствующий номер ({start} - {stop - 1})')
+
+
 def detect_name_or_number() -> tuple:
   while True:
     contact_to_find = input('Введите имя или номер телефона: ')
@@ -97,27 +110,16 @@ def remove_contact(contacts: list[dict]) -> None:
 
   if any(contact[contact_type].lower().lstrip('+') == formated_contact_query for contact in contacts):
     numeration = 1
-    index = 0
     matching_contact_indices = []
 
     for contact in contacts:
       if contact[contact_type].lower().lstrip('+') == formated_contact_query:
-        matching_contact_indices.append(index)
+        matching_contact_indices.append(contacts.index(contact))
         print(f"{numeration}. {contact['name']},   {contact['phone']},   {contact['email']}")
         numeration += 1
-      
-      index += 1
 
-    while True:
-      try: 
-        chosen_number = int(input('Выберите контакт для удаления (введите номер, 0 — если все): '))
-      except ValueError:
-        print('Введите число')
-      else:
-        if chosen_number < numeration and chosen_number >= 0:
-          break
-        else:
-          print('Введите соответствующий номер')
+
+    chosen_number = validate_number_input(0, numeration, 'Выберите контакт для удаления (введите номер, 0 — если все)')
 
     if chosen_number == 0:
       for index in sorted(matching_contact_indices, reverse=True):
@@ -137,13 +139,21 @@ def update_contact(contacts: list[dict]) -> None:
   formated_contact_query, contact_type = detect_name_or_number()
 
   if any(contact[contact_type].lower().lstrip('+') == formated_contact_query for contact in contacts): 
+    numeration = 1
+    matching_contact_indices = []
+    
     for contact in contacts:
       if contact[contact_type].lower().lstrip('+') == formated_contact_query:
-        print(f"{contact['name']},   {contact['phone']},   {contact['email']}")
-        updated_contact = input_and_validate_contact_data()
-        contacts[contacts.index(contact)].update(updated_contact)
-        print('✅ Контакт обновлён!')
-        break
+        matching_contact_indices.append(contacts.index(contact))
+        print(f"{numeration}. {contact['name']},   {contact['phone']},   {contact['email']}")
+        numeration += 1
+
+    chosen_number = validate_number_input(1, numeration, 'Выберите контакт для обновления')
+    updated_contact = input_and_validate_contact_data()
+    contacts[matching_contact_indices[chosen_number - 1]].update(updated_contact)
+    print('✅ Контакт обновлён!')
+
+
 
   else:
     print('❌ Контакт не найден.')
@@ -162,7 +172,7 @@ def main():
 
   while True:
       print(menu) 
-      user_query = int(input('Введите номер действия: '))
+      user_query = validate_number_input(1, 7, 'Введите номер действия')
       match(user_query):
         case 1:
           add_contact(contacts)
