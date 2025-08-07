@@ -1,4 +1,11 @@
 def parse_contacts() -> list[dict]:
+  """
+  Parses contact file and return list of contacts as dict
+
+  Returns:
+    list[dict]: a list where each contact is represented as dict
+  """
+
   contacts = []
   
   with open('contacts.txt', 'r') as file:
@@ -16,6 +23,12 @@ def parse_contacts() -> list[dict]:
 
 
 def write_file(contacts: list[dict]) -> None:
+  """
+  overwrites contacts file with updated list of contacts
+
+  Args:
+  contacts (list[dict]): a list of contacts to write to the file
+  """
   contacts = contacts.copy()
   new_contacts = []
 
@@ -28,6 +41,12 @@ def write_file(contacts: list[dict]) -> None:
 
 
 def input_and_validate_contact_data() -> dict:
+  """
+  Prompts the user to enter their name, phone, email, validating each input
+
+  Returns:
+    dict: A dict containing the user's name, phone and email
+  """
   while True:
     name = input('Введите имя: ')
     if name.isalpha():
@@ -51,6 +70,19 @@ def input_and_validate_contact_data() -> dict:
 
 
 def validate_number_input(start: int, stop: int, input_text: str) -> int:
+  """
+  Prompts the user to enter a number within the specified range and validates the input.
+
+  Args:
+    start (int): The beginning of the range (inclusive)
+    stop (int): The end of the valid range (exclusive)
+    input_text (str): The text shown to the user when asking for input
+
+  Returns:
+    int: A valid number entered by the user within the specified range.
+  """
+
+
   while True:
       try: 
         chosen_number = int(input(f'{input_text}: '))
@@ -64,20 +96,38 @@ def validate_number_input(start: int, stop: int, input_text: str) -> int:
 
 
 def detect_name_or_number() -> tuple:
+  """
+  Prompts the user to enter either a name or a phone and determines which types was entered.
+
+  Returns:
+    tuple: a tuple(formatted_contact_query, contact_type), where:
+      - formatted_contact_query (str): The formatted contact string (lowercased, no "+"), for comparison in the same form.
+      - contact_type (str): either 'name' or 'phone', needed for accurate lookup through the contacts dict
+
+
+  """
+
+
   while True:
     contact_to_find = input('Введите имя или номер телефона: ')
-    formated_contact_query = contact_to_find.lstrip('+').lower()
+    formatted_contact_query = contact_to_find.lstrip('+').lower()
 
-    if formated_contact_query.isdigit() and len(formated_contact_query) == 12:
+    if formatted_contact_query.isdigit() and len(formatted_contact_query) == 12:
       contact_type = 'phone'
       break
     elif contact_to_find.isalpha():
       contact_type = 'name'
       break
-  return (formated_contact_query, contact_type)
+  return (formatted_contact_query, contact_type)
 
 
 def add_contact(contacts: list[dict]) -> None:
+  """
+  Prompts the user to enter data for a new contact and adds it to the contact list
+
+  Args:
+    contacts (list[dict]): A list of contacts to which the new contact will be added
+  """
   contact = input_and_validate_contact_data()
   contacts.append(contact)
   write_file(contacts)
@@ -85,6 +135,14 @@ def add_contact(contacts: list[dict]) -> None:
 
 
 def print_sorted_contacts_by_name(contacts: list[dict]) -> None:
+  """
+  print the contacts sorted by their name in the console
+
+  Args: 
+    contacts (list[dict]): A list of contact dict, each containg (name, phone, email)
+  """
+
+  # sort contacts alphabetically by name without case sensitivity 
   sorted_contacts = sorted(contacts, key=lambda contact: contact.get('name').lower())
   numeration = 1
 
@@ -94,41 +152,58 @@ def print_sorted_contacts_by_name(contacts: list[dict]) -> None:
 
 
 def find_contact(contacts: list[dict]) -> None:
-  formated_contact_query, contact_type = detect_name_or_number()
+  """
+  Promts the user to enter either name or phone, then search and print matching contacts
 
-  if any(contact[contact_type].lower().lstrip('+') == formated_contact_query for contact in contacts):
+  Args:
+    contacts (list[dict]): A list of existing contacts to search through
+  """
+  # gets user's input and determine its type for searching
+  formatted_contact_query, contact_type = detect_name_or_number()
+
+  # checks if there is any matching contact in the current list
+  if any(contact[contact_type].lower().lstrip('+') == formatted_contact_query for contact in contacts):
     print('\n')
     for contact in contacts:
-      if contact[contact_type].lower().lstrip('+') == formated_contact_query:
+      if contact[contact_type].lower().lstrip('+') == formatted_contact_query:
         print(f"{contact['name']},   {contact['phone']},   {contact['email']}")
   else:
     print('❌ Контакт не найден.')
 
 
 def remove_contact(contacts: list[dict]) -> None:
-  formated_contact_query, contact_type = detect_name_or_number()
+  """
+  Prompts the user to enter either name or phone. If mathing contacts are found, allows the user to choose which one to delete. Otherwise print a message 
+  """
+  formatted_contact_query, contact_type = detect_name_or_number()
 
-  if any(contact[contact_type].lower().lstrip('+') == formated_contact_query for contact in contacts):
+  if any(contact[contact_type].lower().lstrip('+') == formatted_contact_query for contact in contacts):
     numeration = 1
+    # 
     matching_contact_indices = []
 
+
+    # look through the contact list. If matching contacts are found, adds their index to matching_contact_indices for later deletion and then print them
     for contact in contacts:
-      if contact[contact_type].lower().lstrip('+') == formated_contact_query:
+      if contact[contact_type].lower().lstrip('+') == formatted_contact_query:
         matching_contact_indices.append(contacts.index(contact))
         print(f"{numeration}. {contact['name']},   {contact['phone']},   {contact['email']}")
         numeration += 1
 
-
+    # returns validated number of the contact the user wants to delete
     chosen_number = validate_number_input(0, numeration, 'Выберите контакт для удаления (введите номер, 0 — если все)')
 
     if chosen_number == 0:
+      # deletes all matching contacts using reversed, sorted list of indices to avoid index shifting
       for index in sorted(matching_contact_indices, reverse=True):
         del contacts[index]
       write_file(contacts)
       print('✅ Контакты удалены!')
 
     else:
+      # deletes selected contact
       del contacts[matching_contact_indices[chosen_number - 1]]
+      write_file(contacts)
       print('✅ Контакт удалён!')
 
   else:
@@ -136,14 +211,18 @@ def remove_contact(contacts: list[dict]) -> None:
 
 
 def update_contact(contacts: list[dict]) -> None:
-  formated_contact_query, contact_type = detect_name_or_number()
+  """
+  Prompts the user to enter either number or name. If matching contacts are found, prompts the user to choose one to update, then ask for a new contact data. finally, updates to the current contact list and save it to the contacts file.
+  """
 
-  if any(contact[contact_type].lower().lstrip('+') == formated_contact_query for contact in contacts): 
+  formatted_contact_query, contact_type = detect_name_or_number()
+
+  if any(contact[contact_type].lower().lstrip('+') == formatted_contact_query for contact in contacts): 
     numeration = 1
     matching_contact_indices = []
     
     for contact in contacts:
-      if contact[contact_type].lower().lstrip('+') == formated_contact_query:
+      if contact[contact_type].lower().lstrip('+') == formatted_contact_query:
         matching_contact_indices.append(contacts.index(contact))
         print(f"{numeration}. {contact['name']},   {contact['phone']},   {contact['email']}")
         numeration += 1
@@ -151,15 +230,18 @@ def update_contact(contacts: list[dict]) -> None:
     chosen_number = validate_number_input(1, numeration, 'Выберите контакт для обновления')
     updated_contact = input_and_validate_contact_data()
     contacts[matching_contact_indices[chosen_number - 1]].update(updated_contact)
+    write_file(contacts)
     print('✅ Контакт обновлён!')
-
 
 
   else:
     print('❌ Контакт не найден.')
 
 
-def main():
+def main() -> None:
+  """
+  parses contacts from contacts file, then display the menu of options the user can perform on the contact list
+  """
   contacts = parse_contacts()
   menu = (
         '\n1. Добавить контакт\n'
@@ -185,8 +267,8 @@ def main():
         case 5:
           print_sorted_contacts_by_name(contacts)
         case 6:
+          print('👋 Программа завершена. До свидания!')
           break
 
 
 main()
-
