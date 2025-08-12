@@ -1,3 +1,63 @@
+def safe_open_file() -> list:
+  """
+  safely open the contacts file.
+
+  Returns:
+    list[str]: A list of string from the file if the file exists, otherwise empty string
+  """
+
+  try:
+    with open('contacts.txt', 'r') as file:
+      lines = file.readlines()
+      return lines
+  except FileNotFoundError:
+    print("File 'contacts.txt' not found. Creating empty list")
+    lines = []
+    return lines 
+  
+
+def prepare_contacts_to_write(contacts: list[dict]) -> list[str]:
+  """
+  formats a list of contact dicts  into list of strings, suitable for writitig to a file
+  """
+  contacts = contacts.copy()
+  formatted_contacts = []
+
+  for contact in contacts:
+    line = f"{contact['name']}, {contact['phone']}, {contact['email']}\n"
+    formatted_contacts.append(line)
+
+  return formatted_contacts
+
+
+def get_valid_name() -> str:
+  """Prompt the user to enter valid name"""
+  while True:
+    name = input('Введите имя: ')
+    if name.isalpha():
+      return name
+
+
+def get_valid_phone() -> str:
+  """Prompt the user to enter valid phone"""
+  while True:
+    phone = input('ведите номер телефона: ')
+    if phone.lstrip('+').isdigit() and len(phone.lstrip('+')) == 12:
+      return phone
+    else: 
+      print('Номер должен состоять из 12 символов и содержать только цифры.')
+
+
+def get_valid_email() -> str:
+  """Prompt the user to enter valid email"""
+  while True:
+    email = input('Введите адрес электронной почты: ')
+    if '@' in email and email:
+      return email
+    else:
+      print('Электронная почта должна содержать символ "@".')
+
+
 def parse_contacts() -> list[dict]:
   """
   Parses contact file and return list of contacts as dict
@@ -6,11 +66,10 @@ def parse_contacts() -> list[dict]:
     list[dict]: a list where each contact is represented as dict
   """
 
-  contacts = []
+  lines = safe_open_file() 
   
-  with open('contacts.txt', 'r') as file:
-    lines = file.readlines()
-    
+  contacts = []
+
   for line in lines:
     formated_list = line.strip('\n').split(', ');
     contact = {
@@ -29,15 +88,10 @@ def write_file(contacts: list[dict]) -> None:
   Args:
   contacts (list[dict]): a list of contacts to write to the file
   """
-  contacts = contacts.copy()
-  new_contacts = []
-
-  for contact in contacts:
-    line = f"{contact['name']}, {contact['phone']}, {contact['email']}\n"
-    new_contacts.append(line)
+  formatted_contacts = prepare_contacts_to_write(contacts)
 
   with open('contacts.txt', 'w') as file:
-    file.writelines(new_contacts)
+    file.writelines(formatted_contacts)
 
 
 def input_and_validate_contact_data() -> dict:
@@ -47,24 +101,9 @@ def input_and_validate_contact_data() -> dict:
   Returns:
     dict: A dict containing the user's name, phone and email
   """
-  while True:
-    name = input('Введите имя: ')
-    if name.isalpha():
-      break
-
-  while True:
-    phone = input('ведите номер телефона: ')
-    if phone.lstrip('+').isdigit() and len(phone.lstrip('+')) == 12 and name != '':
-      break
-    else: 
-      print('Номер должен состоять из 12 символов и содержать только цифры.')
-
-  while True:
-    email = input('Введите адрес электронной почты: ')
-    if '@' in email and email:
-      break
-    else:
-      print('Электронная почта должна содержать символ "@".')
+  name = get_valid_name()
+  phone = get_valid_phone()
+  email = get_valid_email()
 
   return dict(name=name, phone=phone, email=email)
 
@@ -86,13 +125,12 @@ def validate_number_input(start: int, stop: int, input_text: str) -> int:
   while True:
       try: 
         chosen_number = int(input(f'{input_text}: '))
-      except ValueError:
-        print('Error!! Введите число')
-      else:
         if chosen_number < stop and chosen_number >= start:
           return chosen_number
         else:
           print(f'Введите соответствующий номер ({start} - {stop - 1})')
+      except ValueError:
+        print('Error!! Введите число')
 
 
 def detect_name_or_number() -> tuple:
@@ -179,10 +217,7 @@ def remove_contact(contacts: list[dict]) -> None:
 
   if any(contact[contact_type].lower().lstrip('+') == formatted_contact_query for contact in contacts):
     numeration = 1
-    # 
-    matching_contact_indices = []
-
-
+    matching_contact_indices = [] 
     # look through the contact list. If matching contacts are found, adds their index to matching_contact_indices for later deletion and then print them
     for contact in contacts:
       if contact[contact_type].lower().lstrip('+') == formatted_contact_query:
